@@ -1,0 +1,298 @@
+#AUTOR: THAIS SANTANA SANTOS
+
+import random
+import google.generativeai as genai
+import re
+
+# Configuração do modelo
+genai.configure(api_key="coloque sua chave")
+
+generation_config = {
+    "temperature": 1,
+    "top_p": 0.95,
+    "top_k": 0,
+    "max_output_tokens": 8192,
+}
+
+safety_settings = [
+    {"category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_MEDIUM_AND_ABOVE"},
+    {"category": "HARM_CATEGORY_HATE_SPEECH", "threshold": "BLOCK_MEDIUM_AND_ABOVE"},
+    {"category": "HARM_CATEGORY_SEXUALLY_EXPLICIT", "threshold": "BLOCK_MEDIUM_AND_ABOVE"},
+    {"category": "HARM_CATEGORY_DANGEROUS_CONTENT", "threshold": "BLOCK_MEDIUM_AND_ABOVE"},
+]
+
+model = genai.GenerativeModel(
+    model_name="gemini-1.5-pro-latest", generation_config=generation_config, safety_settings=safety_settings
+)
+
+convo = model.start_chat(history=[])
+
+# Lista de alguns temas
+def selecionar_tema(temas_listas):
+    return random.choice(temas_listas)
+
+
+temas = [
+    "Desafio da democracia no Brasil",
+    "Impactos da tecnologia na sociedade",
+    "Desigualdade de gênero",
+    "Preservação do meio ambiente",
+    "Migração e Xenofobia",
+]
+
+tema_aleatorio = selecionar_tema(temas)
+print("tema selecionado:", tema_aleatorio)
+
+
+
+       #------------competência 1 -------------
+
+def verificar_gramatica(texto):
+    erros = []
+
+    # Verificar pontuação
+    if not re.search(r'[.,;:!?]', texto):
+        erros.append("Falta de pontuação")
+
+    # Verificar crase
+    if re.search(r'[^àáâãéêíóôõú]a\s[^a-zá-ú]', texto, re.IGNORECASE):
+        erros.append("Uso incorreto da crase")
+
+    # Verificar ortografia
+    palavras_comuns = ["seção", "sessão", "concerto", "conserto"]
+    for palavra in palavras_comuns:
+        if re.search(r'\b' + palavra + r'\b', texto, re.IGNORECASE):
+            erros.append("Possível erro de ortografia: " + palavra)
+
+    return erros
+
+
+# Solicitar que o usuário insira sua redação
+print("Por favor, insira sua redação:")
+redacao = input()
+
+# Verificar a gramática da redação do usuário
+erros_gramatica = verificar_gramatica(redacao)
+if erros_gramatica:
+    print("Erros de gramática encontrados:")
+    for erro in erros_gramatica:
+        print("-", erro)
+else:
+    print("A redação está gramaticalmente correta.")
+
+
+
+       #------------competência 2 -------------
+
+# Temas e palavras-chave associadas a cada tema
+temas_palavras_chave = {
+    "Desafio da democracia no Brasil": ["democracia", "Brasil", "governo", "eleições"],
+    "Impactos da tecnologia na sociedade": ["tecnologia", "sociedade", "internet", "inovação"],
+    "Desigualdade de gênero": ["gênero", "mulheres", "igualdade", "feminismo"],
+    "Preservação do meio ambiente": ["meio ambiente", "natureza", "sustentabilidade", "ecologia"],
+    "Migração e Xenofobia": ["migração", "xenofobia", "imigrantes", "cultura"]
+}
+
+# Função para contar palavras-chave relacionadas ao tema
+def contar_palavras_chave(texto, palavras_chave):
+    contador = 0
+    for palavra in palavras_chave:
+        if palavra.lower() in texto.lower():
+            contador += 1
+    return contador
+
+# Função para verificar se o texto desviou do tema
+def verificar_desvio_tema(texto, tema):
+    if contar_palavras_chave(texto, temas_palavras_chave[tema]) < 3:
+        return True
+    else:
+        return False
+
+# Verificar se a redação desviou do tema
+if verificar_desvio_tema(redacao, tema_aleatorio):
+    print("A redação desviou do tema:", tema_aleatorio)
+else:
+    print("A redação não desviou do tema:", tema_aleatorio)
+
+
+
+
+    import random
+
+# Função para verificar se os fatos estão relacionados ao tema
+def verificar_fatos(tema, fatos):
+    for fato in fatos:
+        if tema.lower() not in fato.lower():
+            return False
+    return True
+
+# Função para organizar os argumentos
+def organizar_argumentos(tema, fatos):
+    if not verificar_fatos(tema, fatos):
+        return None
+
+    argumentos_organizados = []
+
+
+    for fato in fatos:
+        argumentos_organizados.append(fato)
+
+    # Verificar se a organização dos argumentos está errada
+    if len(argumentos_organizados) != len(fatos):
+        return None
+
+    return argumentos_organizados
+
+# Lista de temas e fatos relacionados a cada tema
+temas_fatos_relacionados = {
+    "Desafio da democracia no Brasil": [
+        "Baixa participação política da população",
+        "Corrupção nos órgãos governamentais",
+        "Desigualdade de acesso à educação e saúde",
+        "Crescimento de movimentos sociais em busca de mudanças",
+        "Importância da educação cívica para fortalecer a democracia"
+    ],
+    "Impactos da tecnologia na sociedade": [
+        "Avanço da inteligência artificial afetando o mercado de trabalho",
+        "Acesso desigual à tecnologia entre diferentes camadas sociais",
+        "Proteção de dados pessoais e privacidade na era digital",
+        "Influência das redes sociais na opinião pública",
+        "Desafios éticos em torno do uso da tecnologia"
+    ],
+    "Desigualdade de gênero": [
+        "Diferença salarial entre homens e mulheres no mercado de trabalho",
+        "Violência doméstica e feminicídio",
+        "Desigualdade de representação em cargos de liderança",
+        "Estereótipos de gênero na mídia e na cultura",
+        "Importância do empoderamento feminino para combater a desigualdade"
+    ],
+    "Preservação do meio ambiente": [
+        "Desmatamento na Amazônia e suas consequências",
+        "Poluição do ar e suas implicações para a saúde pública",
+        "Aquecimento global e seus efeitos nos ecossistemas",
+        "Necessidade de políticas de conservação da biodiversidade",
+        "Importância da educação ambiental para conscientização da população"
+    ],
+    "Migração e Xenofobia": [
+        "Impacto da migração na economia e na cultura dos países receptores",
+        "Xenofobia e discriminação contra imigrantes",
+        "Refugiados e a busca por segurança e oportunidades",
+        "Desafios de integração e inclusão social de migrantes",
+        "Contribuições culturais e econômicas dos migrantes para as sociedades"
+    ]
+}
+
+# Selecionar um tema aleatório
+tema_aleatorio = random.choice(list(temas_fatos_relacionados.keys()))
+
+# Obter os fatos relacionados ao tema aleatório selecionado
+fatos_relacionados = temas_fatos_relacionados[tema_aleatorio]
+
+# Organizar os argumentos
+argumentos_organizados = organizar_argumentos(tema_aleatorio, fatos_relacionados)
+
+# Verificar se os argumentos foram organizados com sucesso
+if argumentos_organizados is not None:
+    # Imprimir os argumentos organizados
+    print("Argumentos organizados sobre o tema:", tema_aleatorio)
+    for i, argumento in enumerate(argumentos_organizados, start=1):
+        print(f"{i}. {argumento}")
+else:
+    print("A organização dos argumentos está incorreta ou os fatos não estão relacionados ao tema.")
+
+       #------------competência 4 -------------
+
+
+# Função para analisar a fluidez da argumentação
+def analisar_fluidez(redacao):
+    conectivos = ["além disso", "por outro lado", "portanto", "entretanto", "consequentemente", "contudo"]
+    conectivos_encontrados = 0
+
+    for conectivo in conectivos:
+        if conectivo in redacao:
+            conectivos_encontrados += redacao.count(conectivo)  # Corrigido para contar ocorrências múltiplas
+
+    # Calcular a coesão entre os parágrafos (apenas uma métrica simples para ilustração)
+    paragrafos = redacao.split("\n")
+    coesao = len(paragrafos)  # Quanto mais parágrafos, maior a coesão
+
+    return conectivos_encontrados, coesao
+
+# Função para verificar se a fluidez está dentro do intervalo aceitável
+def verificar_fluidez(conectivos_encontrados, coesao):
+    if 2 <= conectivos_encontrados <= 5 and coesao >= 3:
+        return True
+    else:
+        return False
+
+
+# Selecionar um tema aleatório
+tema_aleatorio = random.choice(list(temas_fatos_relacionados.keys()))
+
+# Obter os fatos relacionados ao tema aleatório selecionado
+fatos_relacionados = temas_fatos_relacionados[tema_aleatorio]
+
+# Converter os fatos relacionados em uma redação (concatenar os fatos)
+redacao = "\n".join(fatos_relacionados)
+
+# Analisar a fluidez da redação
+conectivos_encontrados, coesao = analisar_fluidez(redacao)
+
+# Verificar se a fluidez está dentro do intervalo aceitável
+if verificar_fluidez(conectivos_encontrados, coesao):
+    print("A fluidez da argumentação está dentro do intervalo aceitável.")
+else:
+    print("A fluidez da argumentação está fora do intervalo aceitável.")
+    if conectivos_encontrados < 2 or conectivos_encontrados > 5:
+        print("Número de conectivos incorreto. Deve estar entre 2 e 5.")
+    if coesao < 3:
+        print("Coesão entre os parágrafos incorreta. Deve ser de pelo menos 3.")
+
+
+       #------------competência 5 -------------
+import random
+
+# Função para gerar propostas de intervenção para cada tema
+def gerar_proposta_intervencao(tema):
+    propostas = {
+        "Desafio da democracia no Brasil": [
+            "Implementação de programas de educação cívica nas escolas para conscientizar os cidadãos sobre seus direitos e deveres políticos.",
+            "Fortalecimento dos mecanismos de controle social, como o acesso à informação e a participação em audiências públicas.",
+            "Promoção de campanhas de combate à corrupção e estímulo à transparência e prestação de contas por parte dos órgãos governamentais."
+        ],
+        "Impactos da tecnologia na sociedade": [
+            "Criação de políticas de inclusão digital para garantir o acesso equitativo à tecnologia em todas as camadas sociais.",
+            "Desenvolvimento de programas de formação e reciclagem profissional para preparar a população para as mudanças no mercado de trabalho.",
+            "Regulamentação e fiscalização mais rigorosas das empresas de tecnologia para proteger os dados pessoais dos usuários e garantir a privacidade."
+        ],
+        "Desigualdade de gênero": [
+            "Implementação de políticas de igualdade salarial e oportunidades de carreira para eliminar a disparidade de gênero no mercado de trabalho.",
+            "Criação de programas de conscientização e prevenção da violência de gênero, com ênfase na educação desde a infância.",
+            "Incentivo à participação das mulheres na política e em cargos de liderança, por meio de cotas e programas de capacitação."
+        ],
+        "Preservação do meio ambiente": [
+            "Adoção de medidas de conservação e recuperação de áreas degradadas, como reflorestamento e proteção de ecossistemas vulneráveis.",
+            "Promoção do uso sustentável dos recursos naturais, por meio de incentivos fiscais e regulamentação ambiental.",
+            "Estímulo à pesquisa e desenvolvimento de tecnologias limpas e renováveis para reduzir a emissão de gases de efeito estufa."
+        ],
+        "Migração e Xenofobia": [
+            "Implementação de políticas de integração e inclusão social dos imigrantes, garantindo acesso a serviços básicos, educação e mercado de trabalho.",
+            "Campanhas de sensibilização e combate à xenofobia e discriminação, promovendo a diversidade cultural e os direitos humanos.",
+            "Fortalecimento da cooperação internacional para lidar com os desafios globais da migração, como refugiados e deslocamentos forçados."
+        ]
+    }
+
+    if tema in propostas:
+        if len(propostas[tema]) < 3:  # Verificar se há poucas propostas
+            return "Proposta de intervenção sem contexto ou pouco conteúdo"
+        else:
+            return "Proposta de intervenção contextualizada: " + random.choice(propostas[tema])
+    else:
+        return "Tema não encontrado."
+
+
+# Gerar e avaliar a proposta de intervenção para o tema fornecido pelo usuário
+print(gerar_proposta_intervencao(tema))
+
+
+
